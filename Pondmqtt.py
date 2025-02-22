@@ -53,7 +53,8 @@ class FishHaven:
         self.fishLocal = Gauge(Metrics.FISH_LOCAL["name"], Metrics.FISH_LOCAL["description"])
         self.fishVisitors = Gauge(Metrics.FISH_VISITORS["name"], Metrics.FISH_VISITORS["description"])
 
-        start_http_server(Prometheus.PROMETHEUS_SERVER)
+        threading.Thread(target=start_http_server(Prometheus.PROMETHEUS_SERVER), daemon=True).start()
+        
     
     def loadBackground(self, image_path: str) -> pygame.Surface:
         try:
