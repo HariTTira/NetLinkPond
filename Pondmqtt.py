@@ -50,6 +50,8 @@ class FishHaven:
         self.fishSpawned = Counter(Metrics.FISH_SPAWNED["name"], Metrics.FISH_SPAWNED["description"])
         self.fishRemoved = Counter(Metrics.FISH_REMOVED["name"], Metrics.FISH_REMOVED["description"])
         self.activeFish = Gauge(Metrics.ACTIVE_FISH["name"], Metrics.ACTIVE_FISH["description"])
+        self.fishLocal = Gauge(Metrics.FISH_LOCAL["name"], Metrics.FISH_LOCAL["description"])
+        self.fishVisitors = Gauge(Metrics.FISH_VISITORS["name"], Metrics.FISH_VISITORS["description"])
 
         start_http_server(Prometheus.PROMETHEUS_SERVER)
     
@@ -145,6 +147,7 @@ class FishHaven:
 
         self.fishSpawned.inc()
         self.activeFish.inc()
+        self.fishLocal.inc()
 
     
     def spawnVisitorFish(self, fish_data):
@@ -163,6 +166,8 @@ class FishHaven:
         self.fishes.append(fish)
         self.stats["total_fish"] += 1
         self.stats["visitor_fish"] += 1
+
+        self.fishVisitors.inc()
 
 
     def updateFish(self):
@@ -193,8 +198,10 @@ class FishHaven:
                 self.activeFish.dec()
                 if fish.genesis_pond == Mqtt.GROUP_NAME:
                     self.stats["local_fish"] -= 1
+                    self.fishLocal.dec()
                 else:
                     self.stats["visitor_fish"] -= 1
+                    self.fishVisitors.dec()
 
             if random.random() < 0.02:
                 fish.direction += random.uniform(-0.5, 0.5)
