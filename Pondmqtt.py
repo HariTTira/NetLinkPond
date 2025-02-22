@@ -1,11 +1,11 @@
-from sharedImports import *
+from Common.sharedImports import *
 from PIL import Image
 from prometheus_client import start_http_server, Counter, Gauge
 import paho.mqtt.client as mqtt
-from Constants.color import Colors
-from Constants.mqtt import Mqtt
-from Constants.prometheus import Metrics, Prometheus
-from Interfaces.Fish import Fish
+from Common.Constants.color import Colors
+from Common.Constants.mqtt import Mqtt
+from Common.Constants.prometheus import Metrics, Prometheus
+from Common.Interfaces.Fish import Fish
 
 
 class FishHaven:

@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from sharedImports import *
+from Common.sharedImports import *
 
 @dataclass
 class Fish:
