@@ -16,14 +16,11 @@ class FishHaven:
         self.screen = pygame.display.set_mode((self.WIDTH, self.HEIGHT))
         pygame.display.set_caption("NetLink Pond")
         
-        # Load and scale background image
         self.background = self.loadBackground("NetLinkPhoto/fishbg.jpg")
         
-        # Initialize font
         self.font = pygame.font.Font(None, 36)
         self.smallFont = pygame.font.Font(None, 24)
         
-        # Load GIF frames
         self.groupFishGif = {
             "NetLink": self.loadGifFrame("NetLinkPhoto/lanturn2.gif"),
             "HoneyBee": self.loadGifFrame("NetLinkPhoto/Ariel.gif"),
@@ -31,28 +28,23 @@ class FishHaven:
 
         self.frameDuration = 0.1
         
-        # Fish settings
         self.fishes: List[Fish] = []
         self.spawnInterval = 14
         self.lastSpawnTime = time.time()
         
-        # Pond stats
         self.stats = {
             "total_fish": 0,
             "local_fish": 0,
             "visitor_fish": 0
         }
         
-        # Topic input
         self.topicInput = ""
         self.topicInputActive = False
         self.topicInputRect = pygame.Rect(self.WIDTH - 410, 10, 200, 36)
         self.selectedTopic = Mqtt.TOPIC
         
-        # Publish button
         self.publishButtonRect = pygame.Rect(self.WIDTH - 200, 10, 190, 36)
         
-        # MQTT setup
         self.setupMqtt()
 
         self.fishSpawned = Counter(Metrics.FISH_SPAWNED["name"], Metrics.FISH_SPAWNED["description"])
@@ -62,19 +54,16 @@ class FishHaven:
         start_http_server(Prometheus.PROMETHEUS_SERVER)
     
     def loadBackground(self, image_path: str) -> pygame.Surface:
-        """Load and scale background image to screen size"""
         try:
             background = pygame.image.load(image_path)
             return pygame.transform.scale(background, (self.WIDTH, self.HEIGHT))
         except Exception as e:
             print(f"Error loading background image: {e}")
-            # Create a fallback surface if image loading fails
             surface = pygame.Surface((self.WIDTH, self.HEIGHT))
             surface.fill(Colors.BLUE)
             return surface
     
     def loadGifFrame(self, gif_path: str) -> List[pygame.Surface]:
-        """Load and convert GIF frames to Pygame surfaces"""
         frames = []
         try:
             gif = Image.open(gif_path)
@@ -87,7 +76,6 @@ class FishHaven:
                     pygameImage = pygame.image.fromstring(
                         frame.tobytes(), frame.size, frame.mode
                     )
-                    # Scale the image if needed (adjust size as necessary)
                     pygameImage = pygame.transform.scale(pygameImage, (100, 100))
                     frames.append(pygameImage)
                     frameCount += 1
@@ -97,7 +85,6 @@ class FishHaven:
             return frames
         except Exception as e:
             print(f"Error loading GIF: {e}")
-            # Create a fallback surface if GIF loading fails
             surface = pygame.Surface((30, 20), pygame.SRCALPHA)
             pygame.draw.ellipse(surface, Colors.ORANGE, (0, 0, 20, 20))
             return [surface]
@@ -150,7 +137,7 @@ class FishHaven:
             animation_time=time.time(),
             speed=2.0,
             id=f"{Mqtt.GROUP_NAME}_{time.time()}",
-            frames=self.groupFishGif.get(Mqtt.GROUP_NAME, self.groupFishGif["NetLink"])  # Assign frames
+            frames=self.groupFishGif.get(Mqtt.GROUP_NAME, self.groupFishGif["NetLink"]) 
         )
         self.fishes.append(fish)
         self.stats["total_fish"] += 1
@@ -171,7 +158,7 @@ class FishHaven:
             animation_time=time.time(),
             speed=2.0,
             id=fish_data["id"],
-            frames=self.groupFishGif.get(fish_data["genesis_pond"], self.groupFishGif["NetLink"])  # Assign frames
+            frames=self.groupFishGif.get(fish_data["genesis_pond"], self.groupFishGif["NetLink"])
         )
         self.fishes.append(fish)
         self.stats["total_fish"] += 1
@@ -181,32 +168,25 @@ class FishHaven:
     def updateFish(self):
         current_time = time.time()
 
-        # Spawn new fish if needed
         if current_time - self.lastSpawnTime > self.spawnInterval:
             self.spawnFish()
             self.lastSpawnTime = current_time
 
-        # Update existing fish
         for fish in self.fishes[:]:
-            # Update position
             fish.x += math.cos(fish.direction) * fish.speed
             fish.y += math.sin(fish.direction) * fish.speed
 
-            # Update animation frame
             if current_time - fish.animation_time > self.frameDuration:
                 fish.current_frame = (fish.current_frame + 1) % len(fish.frames)
                 fish.animation_time = current_time
 
-            # Bounce off walls
             if fish.x < 0 or fish.x > self.WIDTH:
                 fish.direction = math.pi - fish.direction
             if fish.y < 0 or fish.y > self.HEIGHT:
                 fish.direction = -fish.direction
 
-            # Update lifetime
             fish.lifetime -= 0.016
 
-            # Remove dead fish
             if fish.lifetime <= 0:
                 self.fishes.remove(fish)
                 self.fishRemoved.inc()
@@ -221,7 +201,6 @@ class FishHaven:
 
         
     def handleTextInput(self, event):
-        """Handle text input for topic selection"""
         if self.topicInputActive:
             if event.key == pygame.K_RETURN:
                 if self.topicInput.strip():
@@ -282,13 +261,10 @@ class FishHaven:
                     if event.key == pygame.K_SPACE:
                         self.spawnFish()
                     
-                    # Handle text input for topic
                     self.handleTextInput(event)
                 
                 elif event.type == pygame.MOUSEBUTTONDOWN:
-                    # Check publish fish button
                     if self.publishButtonRect.collidepoint(event.pos) and self.fishes:
-                        # Find a local fish to publish
                         for fish in self.fishes:
                             if fish.genesis_pond == Mqtt.GROUP_NAME:
                                 fish_msg = {
@@ -299,9 +275,8 @@ class FishHaven:
                                 self.client.publish(self.selectedTopic, json.dumps(fish_msg))
                                 print(f"Published fish: {fish_msg}")
                                 self.fishes.remove(fish)
-                                break  # Stop after publishing one fish
+                                break
 
-                    # Check topic input box
                     if self.topicInputRect.collidepoint(event.pos):
                         self.topicInputActive = True
                     else:
