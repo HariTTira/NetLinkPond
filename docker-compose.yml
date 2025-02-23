@@ -1,0 +1,24 @@
+version: "3.8"
+
+services:
+  prometheus:
+    image: prom/prometheus:v2.42.0
+    container_name: prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+    restart: always
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./grafana/provisioning:/etc/grafana/provisioning
+      - ./grafana/dashboards:/etc/grafana/dashboards
+    environment:
+      GF_SECURITY_ADMIN_PASSWORD: "admin"
+      GF_DASHBOARDS_MIN_REFRESH_INTERVAL: 1s
+    restart: unless-stopped

@@ -1,0 +1,24 @@
+apiVersion: 1
+
+groups:
+  - name: Fish Pond Alerts
+    folder: Fish Pond
+    interval: 60s
+    rules:
+      - name: No Local Fish
+        condition: last_over_time(fish_local[5m]) == 0
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: No local fish in pond
+          description: No local fish detected in the pond for 5 minutes
+      
+      - name: Low Fish Count
+        condition: last_over_time(active_fish[5m]) < 3
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: Low number of active fish
+          description: Only {{$values}} fish currently active in the pond
