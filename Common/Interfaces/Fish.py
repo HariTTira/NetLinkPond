@@ -6,10 +6,10 @@ class Fish:
     x: float
     y: float
     direction: float
-    genesis_pond: str
+    group_name: str
     lifetime: float
     current_frame: int
     animation_time: float
     speed: float
-    id: str
+    name: str
     frames: List[pygame.Surface]

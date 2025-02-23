@@ -22,8 +22,10 @@ class FishHaven:
         self.smallFont = pygame.font.Font(None, 24)
         
         self.groupFishGif = {
-            "NetLink": self.loadGifFrame("NetLinkPhoto/lanturn2.gif"),
-            "HoneyBee": self.loadGifFrame("NetLinkPhoto/Ariel.gif"),
+            "NetLink": self.loadGifFrame("NetLinkPhoto/NetLink.gif"),
+            "Honey Lemon": self.loadGifFrame("NetLinkPhoto/Honey Lemon.gif"),
+            "Parallel": self.loadGifFrame("NetLinkPhoto/Parallel.gif"),
+            "DC_Universe": self.loadGifFrame("NetLinkPhoto/DC_Universe.gif"),
         }
 
         self.frameDuration = 0.1
@@ -95,27 +97,28 @@ class FishHaven:
     def setupMqtt(self):
         self.client = mqtt.Client()
         self.client.username_pw_set(Mqtt.MQTT_USERNAME, Mqtt.MQTT_PASSWORD)
-        self.client.onConnect = self.onConnect
-        self.client.onMessage = self.onMessage
+        self.client.on_connect = self.on_connect
+        self.client.on_message = self.on_message
         self.client.connect(Mqtt.MQTT_SERVER, Mqtt.MQTT_PORT, 60)
         self.client.loop_start()
     
-    def onConnect(self, client, userdata, flags, rc):
+    def on_connect(self, client, userdata, flags, rc):
         if rc == 0:
             print("Connected to MQTT broker!")
-            self.client.subscribe(Mqtt.TOPIC)
+            topics = [(Mqtt.TOPIC, 0), ("user/NetLink", 0)]
+            self.client.subscribe(topics)
             self.sendHello()
         else:
             print(f"Failed to connect, return code {rc}")
 
-    def onMessage(self, client, userdata, message):
+    def on_message(self, client, userdata, message):
         print(f"Message received on topic {message.topic}: {message.payload.decode('utf-8')}")
         
         try:
             data = json.loads(message.payload.decode('utf-8'))
-            if all(key in data for key in ["id", "genesis_pond", "lifetime"]) and data["genesis_pond"] != Mqtt.GROUP_NAME:
+            if all(key in data for key in ["name", "group_name", "lifetime"]) and data["group_name"] != Mqtt.GROUP_NAME:
                 self.spawnVisitorFish(data)
-                print(f"Spawned visitor fish from {data['genesis_pond']}")
+                print(f"Spawned visitor fish from {data['group_name']}")
         
         except json.JSONDecodeError:
             print("Error: Received malformed JSON")
@@ -134,12 +137,12 @@ class FishHaven:
             x=random.randint(50, self.WIDTH - 50),
             y=random.randint(50, self.HEIGHT - 50),
             direction=random.uniform(0, 2 * math.pi),
-            genesis_pond=Mqtt.GROUP_NAME,
+            group_name=Mqtt.GROUP_NAME,
             lifetime=15.0,
             current_frame=0,
             animation_time=time.time(),
             speed=2.0,
-            id=f"{Mqtt.GROUP_NAME}_{time.time()}",
+            name=f"{Mqtt.GROUP_NAME}_{time.time()}",
             frames=self.groupFishGif.get(Mqtt.GROUP_NAME, self.groupFishGif["NetLink"]) 
         )
         self.fishes.append(fish)
@@ -156,13 +159,13 @@ class FishHaven:
             x=random.randint(50, self.WIDTH - 50),
             y=random.randint(50, self.HEIGHT - 50),
             direction=random.uniform(0, 2 * math.pi),
-            genesis_pond=fish_data["genesis_pond"],
+            group_name=fish_data["group_name"],
             lifetime=fish_data["lifetime"],
             current_frame=0,
             animation_time=time.time(),
             speed=2.0,
-            id=fish_data["id"],
-            frames=self.groupFishGif.get(fish_data["genesis_pond"], self.groupFishGif["NetLink"])
+            name=fish_data["name"],
+            frames=self.groupFishGif.get(fish_data["group_name"], self.groupFishGif["NetLink"])
         )
         self.fishes.append(fish)
         self.stats["total_fish"] += 1
@@ -197,7 +200,7 @@ class FishHaven:
                 self.fishes.remove(fish)
                 self.fishRemoved.inc()
                 self.activeFish.dec()
-                if fish.genesis_pond == Mqtt.GROUP_NAME:
+                if fish.group_name == Mqtt.GROUP_NAME:
                     self.stats["local_fish"] -= 1
                     self.fishLocal.dec()
                 else:
@@ -274,14 +277,14 @@ class FishHaven:
                 elif event.type == pygame.MOUSEBUTTONDOWN:
                     if self.publishButtonRect.collidepoint(event.pos) and self.fishes:
                         for fish in self.fishes:
-                            if fish.genesis_pond == Mqtt.GROUP_NAME:
+                            if fish.group_name == Mqtt.GROUP_NAME:
                                 fish_msg = {
-                                    "id": fish.id,
-                                    "genesis_pond": fish.genesis_pond,
+                                    "name": fish.name,
+                                    "group_name": fish.group_name,
                                     "lifetime": fish.lifetime
                                 }
                                 self.client.publish(self.selectedTopic, json.dumps(fish_msg))
-                                print(f"Published fish: {fish_msg}")
+                                print(f"Published fish: {fish_msg} to: {self.selectedTopic}")
                                 self.fishes.remove(fish)
                                 break
 
