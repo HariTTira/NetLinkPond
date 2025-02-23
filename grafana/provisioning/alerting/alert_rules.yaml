@@ -1,72 +1,12 @@
 apiVersion: 1
 groups:
     - orgId: 1
-      name: test
-      folder: test
-      interval: 10s
-      rules:
-        - uid: cedx5wswp4feob
-          title: tester101
-          condition: C
-          data:
-            - refId: A
-              relativeTimeRange:
-                from: 300
-                to: 0
-              datasourceUid: PBFA97CFB590B2093
-              model:
-                disableTextWrap: false
-                editorMode: builder
-                expr: active_fish{job="fish_haven"}
-                fullMetaSearch: false
-                includeNullMetadata: true
-                instant: true
-                intervalMs: 1000
-                legendFormat: __auto
-                maxDataPoints: 43200
-                range: false
-                refId: A
-                useBackend: false
-            - refId: C
-              datasourceUid: __expr__
-              model:
-                conditions:
-                    - evaluator:
-                        params:
-                            - 5
-                        type: gt
-                      operator:
-                        type: and
-                      query:
-                        params:
-                            - C
-                      reducer:
-                        params: []
-                        type: last
-                      type: query
-                datasource:
-                    type: __expr__
-                    uid: __expr__
-                expression: A
-                intervalMs: 1000
-                maxDataPoints: 43200
-                refId: C
-                type: threshold
-          noDataState: Alerting
-          execErrState: Alerting
-          isPaused: false
-          notification_settings:
-            receiver: discord_alert
-
-apiVersion: 1
-groups:
-    - orgId: 1
       name: Alive Fish
       folder: test
       interval: 1m
       rules:
         - uid: dedxdrsu2h8n4c
-          title: Too much FIsh
+          title: Too much Fish
           condition: C
           data:
             - refId: A
@@ -93,71 +33,7 @@ groups:
                 conditions:
                     - evaluator:
                         params:
-                            - 25
-                        type: gt
-                      operator:
-                        type: and
-                      query:
-                        params:
-                            - C
-                      reducer:
-                        params: []
-                        type: last
-                      type: query
-                datasource:
-                    type: __expr__
-                    uid: __expr__
-                expression: A
-                intervalMs: 1000
-                maxDataPoints: 43200
-                refId: C
-                type: threshold
-          noDataState: NoData
-          execErrState: Error
-          for: 1m
-          annotations:
-            description: Please Rotate
-            summary: Too much Fish
-          isPaused: false
-          notification_settings:
-            receiver: discord_alert
-
-apiVersion: 1
-groups:
-    - orgId: 1
-      name: Alive Fish
-      folder: test
-      interval: 1m
-      rules:
-        - uid: dedxdrsu2h8n4c
-          title: Too much FIsh
-          condition: C
-          data:
-            - refId: A
-              relativeTimeRange:
-                from: 600
-                to: 0
-              datasourceUid: PBFA97CFB590B2093
-              model:
-                disableTextWrap: false
-                editorMode: builder
-                expr: active_fish{job="fish_haven"}
-                fullMetaSearch: false
-                includeNullMetadata: true
-                instant: true
-                intervalMs: 1000
-                legendFormat: __auto
-                maxDataPoints: 43200
-                range: false
-                refId: A
-                useBackend: false
-            - refId: C
-              datasourceUid: __expr__
-              model:
-                conditions:
-                    - evaluator:
-                        params:
-                            - 25
+                            - 1
                         type: gt
                       operator:
                         type: and
@@ -186,7 +62,7 @@ groups:
           notification_settings:
             receiver: discord_alert
         - uid: fedxe6f2pw1dsc
-          title: VIsitor Fish is here!
+          title: Visitor Fish is here!
           condition: C
           data:
             - refId: A
