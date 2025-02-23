@@ -11,8 +11,7 @@
   "panels": [
     {
       "datasource": {
-        "type": "prometheus",
-        "uid": "prometheus"
+        "type": "prometheus"
       },
       "fieldConfig": {
         "defaults": {
