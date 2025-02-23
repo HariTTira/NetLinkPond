@@ -42,7 +42,7 @@
         "y": 0
       },
       "title": "Active Fish Count",
-      "type": "stat",
+      "type": "timeseries",
       "targets": [
         {
           "expr": "active_fish",
@@ -83,7 +83,7 @@
         "y": -12
       },
       "title": "Local Fish Count",
-      "type": "stat",
+      "type": "timeseries",
       "targets": [
         {
           "expr": "fish_local",
@@ -124,7 +124,7 @@
         "y": -12
       },
       "title": "Visitor Fish Count",
-      "type": "stat",
+      "type": "timeseries",
       "targets": [
         {
           "expr": "fish_visitors",
@@ -165,7 +165,7 @@
         "y": 0
       },
       "title": "Removed Fish Count",
-      "type": "stat",
+      "type": "timeseries",
       "targets": [
         {
           "expr": "fish_removed_total",
@@ -206,14 +206,65 @@
         "y": 13
       },
       "title": "Spawned Fish Count",
-      "type": "stat",
+      "type": "timeseries",
       "targets": [
         {
           "expr": "fish_spawned_total",
           "refId": "A"
         }
       ]
+    },
+    {
+      "datasource": {
+        "type": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "red",
+                "value": null
+              },
+              {
+                "color": "green",
+                "value": 1
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 24,
+        "x": 0,
+        "y": 25
+      },
+      "title": "⚠️ DATA SOURCE ERROR",
+      "type": "timeseries",
+      "targets": [
+        {
+          "expr": "up{job='prometheus'}",
+          "refId": "A"
+        }
+      ],
+      "colorMode": "background",
+      "valueMappings": [
+        {
+          "id": 0,
+          "op": "=",
+          "value": "0",
+          "text": "❌ DATASOURCE NO DATA"
+        }
+      ]
     }
+    
   ],
   "refresh": "5s",
   "schemaVersion": 38,
