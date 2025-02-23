@@ -1,0 +1,11 @@
+apiVersion: 1
+contactPoints:
+    - orgId: 1
+      name: discord_alert
+      receivers:
+        - uid: dedx87pwjfym8b
+          type: discord
+          settings:
+            url: https://discord.com/api/webhooks/1343165836478906439/wfXzxsTOtrb5O_JLtbL6tQc4do1fx3zMU-1eokDBDWwTsKPacn3Pl4QeKf94gB9KPvZP
+            use_discord_username: false
+          disableResolveMessage: false

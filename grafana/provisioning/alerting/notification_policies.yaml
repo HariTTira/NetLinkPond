@@ -1,0 +1,7 @@
+apiVersion: 1
+policies:
+    - orgId: 1
+      receiver: discord_alert
+      group_wait: 60s
+      group_interval: 60s
+      repeat_interval: 60s
