@@ -22,3 +22,40 @@ services:
       GF_SECURITY_ADMIN_PASSWORD: "admin"
       GF_DASHBOARDS_MIN_REFRESH_INTERVAL: 1s
     restart: unless-stopped
+
+  redis-master:
+    image: redis:latest
+    container_name: redis-master
+    ports:
+      - "6379:6379"
+    command: redis-server --appendonly yes
+    volumes:
+      - redis-master-data:/data
+    restart: always
+
+  redis-replica-1:
+    image: redis:latest
+    container_name: redis-replica-1
+    depends_on:
+      - redis-master
+    command: redis-server --slaveof redis-master 6379
+    restart: always
+
+  redis-replica-2:
+    image: redis:latest
+    container_name: redis-replica-2
+    depends_on:
+      - redis-master
+    command: redis-server --slaveof redis-master 6379
+    restart: always
+
+  redis-replica-3:
+    image: redis:latest
+    container_name: redis-replica-3
+    depends_on:
+      - redis-master
+    command: redis-server --slaveof redis-master 6379
+    restart: always
+
+volumes:
+  redis-master-data:

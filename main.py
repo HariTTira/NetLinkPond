@@ -6,11 +6,12 @@ from Common.Constants.color import Colors
 from Common.Constants.mqtt import Mqtt
 from Common.Constants.prometheus import Metrics, Prometheus
 from Common.Interfaces.Fish import Fish
-
+import redis
 
 class FishHaven:
     def __init__(self):
         pygame.init()
+        self.setupRedis()
         self.WIDTH = 800
         self.HEIGHT = 600
         self.screen = pygame.display.set_mode((self.WIDTH, self.HEIGHT))
@@ -57,7 +58,28 @@ class FishHaven:
 
         start_http_server(Prometheus.PROMETHEUS_SERVER)
         
-    
+    def setupRedis(self):
+        self.redis_client = redis.StrictRedis(host="localhost", port=6379, decode_responses=True)
+
+    def store_fish_data(self, fish):
+        fish_data = {
+            "name": fish.name,
+            "group_name": fish.group_name,
+            "x": fish.x,
+            "y": fish.y,
+            "lifetime": fish.lifetime,
+            "speed": fish.speed
+        }
+        self.redis_client.set(f"fish:{fish.name}", json.dumps(fish_data))
+
+    def remove_fish_data(self, name):
+        self.redis_client.delete(f"fish:{name}")
+
+    def get_fish_data(self, name):
+        fish_data = self.redis_client.get(f"fish:{name}")
+        print(f"Fetching data for {name}: {fish_data}")  # Debugging line
+        return json.loads(fish_data) if fish_data else None
+
     def loadBackground(self, image_path: str) -> pygame.Surface:
         try:
             background = pygame.image.load(image_path)
@@ -148,7 +170,8 @@ class FishHaven:
         self.fishes.append(fish)
         self.stats["total_fish"] += 1
         self.stats["local_fish"] += 1
-
+    # Store fish data in Redis
+        self.store_fish_data(fish)
         self.fishSpawned.inc()
         self.activeFish.inc()
         self.fishLocal.inc()
@@ -171,6 +194,9 @@ class FishHaven:
         self.stats["total_fish"] += 1
         self.stats["visitor_fish"] += 1
 
+        self.store_fish_data(fish)
+        redis_data = self.get_fish_data(fish.name)
+        print("redis data: ", redis_data)
         self.fishVisitors.inc()
 
 
@@ -198,6 +224,8 @@ class FishHaven:
 
             if fish.lifetime <= 0:
                 self.fishes.remove(fish)
+                # Remove fish from Redis
+                self.remove_fish_data(fish.name)
                 self.fishRemoved.inc()
                 self.activeFish.dec()
                 if fish.group_name == Mqtt.GROUP_NAME:
